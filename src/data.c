@@ -17,10 +17,10 @@
 
 /* MAKE DATA OBJECTS */
 
-data_t *make_int(const int i) {
+data_t *make_int(const int i, lisp_ctx_t *context) {
 	data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
 	out->type = integer;
@@ -29,10 +29,10 @@ data_t *make_int(const int i) {
 	return out;
 }
 
-data_t *make_decimal(const double d) {
+data_t *make_decimal(const double d, lisp_ctx_t *context) {
 	data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
 	out->type = decimal;
@@ -41,13 +41,13 @@ data_t *make_decimal(const double d) {
 	return out;
 }
 
-data_t *make_string(const char *str) {
+data_t *make_string(const char *str, lisp_ctx_t *context) {
 	data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
-	if(!(out->string = (char*)malloc(strlen(str) + 1))) {
+	if(!(out->string = malloc(strlen(str) + 1))) {
 		free(out);
 		return NULL;
 	}
@@ -58,13 +58,13 @@ data_t *make_string(const char *str) {
 	return out;
 }
 
-data_t *make_symbol(const char *ident) {
+data_t *make_symbol(const char *ident, lisp_ctx_t *context) {
 	data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
-	if(!(out->symbol = (char*)malloc(strlen(ident) + 1))) {
+	if(!(out->symbol = malloc(strlen(ident) + 1))) {
 		free(out);
 		return NULL;
 	}
@@ -75,10 +75,10 @@ data_t *make_symbol(const char *ident) {
 	return out;
 }
 
-data_t *make_primitive(prim_proc in) {
+data_t *make_primitive(prim_proc in, lisp_ctx_t *context) {
 		data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
 	out->type = prim_procedure;
@@ -87,15 +87,32 @@ data_t *make_primitive(prim_proc in) {
 	return out;
 }
 
-/* LIST MANIPULATION */
-
-data_t *cons(const data_t *l, const data_t *r) {
+data_t *make_error(const char *errmsg, lisp_ctx_t *context) {
 	data_t *out;
 
-	if(!(out = lisp_data_alloc(sizeof(data_t))))
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
 		return NULL;
 
-	if(!(out->pair = (cons_t*)malloc(sizeof(cons_t)))) {
+	if(!(out->error = malloc(strlen(errmsg) + 1))) {
+		free(out);
+		return NULL;
+	}
+
+	out->type = error;
+	strcpy(out->error, errmsg);
+
+	return out;
+}
+
+/* LIST MANIPULATION */
+
+data_t *cons_in_context(const data_t *l, const data_t *r, lisp_ctx_t *context) {
+	data_t *out;
+
+	if(!(out = lisp_data_alloc(sizeof(data_t), context)))
+		return NULL;
+
+	if(!(out->pair = malloc(sizeof(cons_t)))) {
 		free(out);
 		return NULL;
 	}
@@ -150,6 +167,8 @@ int is_equal(const data_t *d1, const data_t *d2) {
 			return d1->proc == d2->proc;
 		case string:
 			return !strcmp(d1->string, d2->string);
+		case error:
+			return 0;
 		case symbol:			
 			return !strcmp(d1->symbol, d2->symbol);
 	}
@@ -165,10 +184,7 @@ int length(const data_t *list) {
 	
 	if(list->type != pair)
 		return 0;
-/*
-	if(list->pair->l == NULL)
-		return 0;
-*/
+
 	do {
 		out++;
 		if(list->type == pair)
@@ -200,7 +216,7 @@ data_t *make_copy(const data_t *in) {
 	if(!in)
 		return NULL;
 
-	out = (data_t*)malloc(sizeof(data_t));
+	out = malloc(sizeof(data_t));
 	if(!out)
 		return NULL;
 
@@ -211,15 +227,19 @@ data_t *make_copy(const data_t *in) {
 		case decimal: out->decimal = in->decimal; break;
 		case prim_procedure: out->proc = in->proc; break;
 		case string: 
-			out->string = (char*)malloc(strlen(in->string) + 1);
+			out->string = malloc(strlen(in->string) + 1);
 			strcpy(out->string, in->string);
 			break;
 		case symbol:
-			out->symbol = (char*)malloc(strlen(in->symbol) + 1);
+			out->symbol = malloc(strlen(in->symbol) + 1);
 			strcpy(out->symbol, in->symbol);
-			break;		
+			break;
+		case error:
+			out->error = malloc(strlen(in->error) + 1);
+			strcpy(out->error, in->error);
+			break;
 		case pair:
-			out->pair = (cons_t*)malloc(sizeof(cons_t));
+			out->pair = malloc(sizeof(cons_t));
 			if(!out)
 				return NULL;
 			if(in->pair->l)
