@@ -1,6 +1,6 @@
 /*
  * libisp -- Lisp evaluator based on SICP
- * (C) 2013 Martin Wolters
+ * (C) 2013-2017 Martin Wolters
  *
  * This program is free software. It comes without any warranty, to
  * the extent permitted by applicable law. You can redistribute it
@@ -14,8 +14,8 @@
 #include "libisp/data.h"
 #include "libisp/eval.h"
 
-static void print_data_rec(const data_t *d, int print_parens, lisp_ctx_t *context) {
-	data_t *head, *tail;
+static void print_data_rec(const lisp_data_t *d, int print_parens, lisp_ctx_t *context) {
+	lisp_data_t *head, *tail;
 
 	if(!d)
 		printf("()");
@@ -23,13 +23,13 @@ static void print_data_rec(const data_t *d, int print_parens, lisp_ctx_t *contex
 		printf("<env>");
 	else {
 		switch(d->type) {
-			case prim_procedure: printf("<proc>"); break;
-			case integer: printf("%d", d->integer); break;
-			case decimal: printf("%g", d->decimal); break;
-			case symbol: printf("%s", d->symbol); break;
-			case string: printf("\"%s\"", d->string); break;
-			case error: printf("ERROR: '%s'", d->error); break;
-			case pair:
+			case lisp_type_prim: printf("<proc>"); break;
+			case lisp_type_integer: printf("%d", d->integer); break;
+			case lisp_type_decimal: printf("%g", d->decimal); break;
+			case lisp_type_symbol: printf("%s", d->symbol); break;
+			case lisp_type_string: printf("\"%s\"", d->string); break;
+			case lisp_type_error: printf("ERROR: '%s'", d->error); break;
+			case lisp_type_pair:
 				if(is_compound_procedure(d)) {
 					printf("<proc>");
 					break;
@@ -38,12 +38,12 @@ static void print_data_rec(const data_t *d, int print_parens, lisp_ctx_t *contex
 				if(print_parens)
 					printf("(");
 
-				head = car(d);
-				tail = cdr(d);
+				head = lisp_car(d);
+				tail = lisp_cdr(d);
 
 				if(tail) {
 					print_data_rec(head, 1, context);
-					if(tail->type != pair) {
+					if(tail->type != lisp_type_pair) {
 						printf(" . ");
 						print_data_rec(tail, 1, context);
 					} else {
@@ -60,6 +60,6 @@ static void print_data_rec(const data_t *d, int print_parens, lisp_ctx_t *contex
 	}
 }
 
-void print_data(const data_t *d, lisp_ctx_t *context) {
+void lisp_print(const lisp_data_t *d, lisp_ctx_t *context) {
 	print_data_rec(d, 1, context);
 }

@@ -1,6 +1,6 @@
 /*
  * libisp -- Lisp evaluator based on SICP
- * (C) 2013 Martin Wolters
+ * (C) 2013-2017 Martin Wolters
  *
  * This program is free software. It comes without any warranty, to
  * the extent permitted by applicable law. You can redistribute it
@@ -11,9 +11,9 @@
 
 #include "libisp/defs.h"
 
-#ifndef LIBISP_PRINT_H_
-#define LIBISP_PRINT_H_
+#ifndef LISP_PRINT_H_
+#define LISP_PRINT_H_
 
-void print_data(const data_t *d, lisp_ctx_t *context);
+void lisp_print(const lisp_data_t *d, lisp_ctx_t *context);
 
 #endif

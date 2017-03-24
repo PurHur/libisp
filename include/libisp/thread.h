@@ -1,6 +1,6 @@
 /*
  * libisp -- Lisp evaluator based on SICP
- * (C) 2013 Martin Wolters
+ * (C) 2013-2017 Martin Wolters
  *
  * This program is free software. It comes without any warranty, to
  * the extent permitted by applicable law. You can redistribute it
@@ -11,9 +11,9 @@
 
 #include "libisp/defs.h"
 
-#ifndef LIBISP_THREAD_H_
-#define LIBISP_THREAD_H_
+#ifndef LISP_THREAD_H_
+#define LISP_THREAD_H_
 
-data_t *eval_thread(const data_t *exp, lisp_ctx_t *context);
+lisp_data_t *lisp_eval_thread(const lisp_data_t *exp, lisp_ctx_t *context);
 
 #endif

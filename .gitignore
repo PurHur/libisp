@@ -1,6 +1,12 @@
 src/*.o
+ipch
 Release
 Debug
 libisp/Release
 libisp/Debug
-
+libisp/libisp.vcxproj.user
+libisp.opensdf
+libisp.sdf
+libisp.suo
+repl/repl.vcxproj.user
+sample/sample.vcxproj.user
